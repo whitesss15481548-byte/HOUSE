@@ -7,7 +7,7 @@ from datetime import datetime
 
 # Constants
 FB_GRAPH_API_BASE = "https://graph.facebook.com/"
-DEFAULT_GRAPH_API_VERSION = "v21.0"
+DEFAULT_GRAPH_API_VERSION = "v25.0"
 
 # Helper function to mask token for display
 def mask_token(token):

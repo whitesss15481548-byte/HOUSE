@@ -8,7 +8,7 @@
 
 1.  `FB_PAGE_ID_HUANGYU`: 凰羽選宅粉絲專頁的 Page ID (例如：`110923925432843`)
 2.  `FB_PAGE_TOKEN_HUANGYU`: 凰羽選宅粉絲專頁的 Access Token。請確保此 Token 具有發文權限。
-3.  `FB_GRAPH_API_VERSION`: Meta Graph API 的版本 (例如：`v21.0`)。如果未設定，系統將預設使用 `v21.0`。
+3.  `FB_GRAPH_API_VERSION`: Meta Graph API 的版本 (例如：`v25.0`)。如果未設定，系統將預設使用 `v25.0`。
 
 **重要安全提示：**
 *   請勿將任何 Token 資訊直接寫入程式碼、README、log 檔案或 GitHub Actions 的 log 輸出中。

@@ -1,0 +1,101 @@
+name: FB Huangyu Weekend Auto Post
+
+on:
+  workflow_dispatch:
+    inputs:
+      category:
+        description: "Post category"
+        required: true
+        default: "saturday_money_class"
+        type: choice
+        options:
+          - saturday_money_class
+          - sunday_cleanup
+
+      publish:
+        description: "Publish to Facebook"
+        required: true
+        default: false
+        type: boolean
+
+  schedule:
+    # 凰羽選宅｜週六屋主小教室｜台灣時間週六 20:00
+    - cron: "0 12 * * 6"
+
+    # 凰羽選宅｜週日看屋整理術｜台灣時間週日 17:00
+    - cron: "0 9 * * 0"
+
+jobs:
+  post-to-facebook:
+    runs-on: ubuntu-latest
+
+    env:
+      FB_PAGE_ID_HUANGYU: ${{ secrets.FB_PAGE_ID_HUANGYU }}
+      FB_PAGE_TOKEN_HUANGYU: ${{ secrets.FB_PAGE_TOKEN_HUANGYU }}
+      FB_GRAPH_API_VERSION: ${{ secrets.FB_GRAPH_API_VERSION }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Check config
+        run: |
+          python main_huangyu.py --check-config
+
+      - name: Decide category
+        id: decide
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "category=${{ github.event.inputs.category }}" >> $GITHUB_OUTPUT
+            echo "publish=${{ github.event.inputs.publish }}" >> $GITHUB_OUTPUT
+          else
+            DOW=$(date -u +%u)
+            HOUR=$(date -u +%H)
+            MIN=$(date -u +%M)
+
+            if [ "$DOW" = "6" ] && [ "$HOUR" = "12" ] && [ "$MIN" = "00" ]; then
+              echo "category=saturday_money_class" >> $GITHUB_OUTPUT
+              echo "publish=true" >> $GITHUB_OUTPUT
+            elif [ "$DOW" = "7" ] && [ "$HOUR" = "09" ] && [ "$MIN" = "00" ]; then
+              echo "category=sunday_cleanup" >> $GITHUB_OUTPUT
+              echo "publish=true" >> $GITHUB_OUTPUT
+            else
+              echo "category=none" >> $GITHUB_OUTPUT
+              echo "publish=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Check token
+        if: steps.decide.outputs.category != 'none'
+        run: |
+          python main_huangyu.py --check-token --page huangyu
+
+      - name: Publish scheduled post
+        if: steps.decide.outputs.publish == 'true'
+        run: |
+          python main_huangyu.py --page huangyu --category ${{ steps.decide.outputs.category }} --auto-next --publish
+
+      - name: Manual dry run
+        if: github.event_name == 'workflow_dispatch' && steps.decide.outputs.publish != 'true'
+        run: |
+          python main_huangyu.py --page huangyu --category ${{ steps.decide.outputs.category }} --auto-next --dry-run
+
+      - name: Upload logs and history
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fb-huangyu-post-logs
+          path: |
+            logs/
+            posted_history.json

@@ -19,7 +19,7 @@ def mask_token(token):
 
 # Load posted history
 def load_posted_history():
-    history_path = "repo/posted_history.json"
+    history_path = "posted_history.json"
     if os.path.exists(history_path):
         with open(history_path, "r", encoding="utf-8") as f:
             return json.load(f)
@@ -27,7 +27,7 @@ def load_posted_history():
 
 # Save posted history
 def save_posted_history(history):
-    history_path = "repo/posted_history.json"
+    history_path = "posted_history.json"
     with open(history_path, "w", encoding="utf-8") as f:
         json.dump(history, f, ensure_ascii=False, indent=4)
 
@@ -62,7 +62,7 @@ def check_token(page_name):
 
 # Function to get the next post
 def get_next_post(page, category, history):
-    post_dir = os.path.join("repo", "posts", page, category)
+    post_dir = os.path.join(".", "posts", page, category)
     if not os.path.exists(post_dir):
         print(f"Warning: Post directory {post_dir} does not exist.")
         return None, None, None
@@ -200,7 +200,7 @@ def main():
 
     if args.post:
         post_key = args.post
-        post_dir = os.path.join("repo", "posts", args.page, args.category)
+        post_dir = os.path.join(".", "posts", args.page, args.category)
         text_path = os.path.join(post_dir, post_key + ".txt")
         if not os.path.exists(text_path):
             print(f"Error: Specified post text file not found at {text_path}")
